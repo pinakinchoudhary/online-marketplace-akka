@@ -190,8 +190,8 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 		this.pendingRequests = new HashMap<>();
 		this.externalServiceClient = new ExternalServiceClient(
 			context.getSystem(),
-			"http://localhost:8080", // Account service base URL
-			"http://localhost:8082"  // Wallet service base URL
+			"http://host.docker.internal:8080", // Account service base URL
+			"http://host.docker.internal:8082"  // Wallet service base URL
 		);
 		this.orderCounter = 0;
 		initializeProducts();

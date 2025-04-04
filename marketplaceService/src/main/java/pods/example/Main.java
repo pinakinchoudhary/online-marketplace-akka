@@ -243,7 +243,7 @@ public class Main {
 
             // Start HTTP server
             try {
-                HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+                HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
                 server.createContext("/", new MyHandler());
                 server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
                 server.start();

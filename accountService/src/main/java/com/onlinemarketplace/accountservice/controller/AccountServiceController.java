@@ -25,8 +25,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class AccountServiceController {
     private final UserRepository userRepository;
     private final RestClient restClient;
-    private static final String marketplaceServiceURI = "http://localhost:8081";
-    private static final String walletServiceURI = "http://localhost:8082";
+    private static final String marketplaceServiceURI = "http://host.docker.internal:8081";
+    private static final String walletServiceURI = "http://host.docker.internal:8082";
     
     // Global lock for user operations
     private final ReadWriteLock userOperationsLock = new ReentrantReadWriteLock();

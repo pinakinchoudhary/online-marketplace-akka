@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class WalletServiceController {
     private final WalletRepository walletRepository;
     private final RestClient restClient;
-    private static final String accountServiceURI = "http://localhost:8080";
+    private static final String accountServiceURI = "http://host.docker.internal:8080";
     private static final String accountServiceEndpoint = "/users/";
     
     // Cache of user-specific locks to prevent concurrent operations on the same wallet
