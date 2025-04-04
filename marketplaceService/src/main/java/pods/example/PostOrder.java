@@ -143,7 +143,7 @@ public class PostOrder extends AbstractBehavior<PostOrder.Command> {
                         true, 
                         "", 
                         productResponse.price,
-                        productResponse.stockQuantity
+                        productResponse.stock_quantity
                     );
                 }
                 return new ProductStockResponse(productId, false, "Product not found", null, null);

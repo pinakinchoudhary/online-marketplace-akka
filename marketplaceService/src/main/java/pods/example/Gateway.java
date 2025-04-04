@@ -113,30 +113,30 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 		public final String name;
 		public final String description;
 		public final Integer price;
-		public final Integer stockQuantity;
+		public final Integer stock_quantity;
 
-		public ProductResponse(String id, String name, String description, Integer price, Integer stockQuantity) {
+		public ProductResponse(String id, String name, String description, Integer price, Integer stock_quantity) {
 			this.id = id;
 			this.name = name;
 			this.description = description;
 			this.price = price;
-			this.stockQuantity = stockQuantity;
+			this.stock_quantity = stock_quantity;
 		}
 	}
 
 	public static class OrderResponse implements Response {
 		@JsonProperty("order_id")
-		public final String orderId;
+		public final Integer orderId;
 		@JsonProperty("user_id")
-		public final String userId;
+		public final Integer userId;
 		@JsonProperty("total_price")
 		public final Integer totalPrice;
 		public final String status;
 		public final List<OrderItem.OrderItemResponse> items;
 
 		public OrderResponse(String orderId, String userId, Integer totalPrice, String status, List<OrderItem.OrderItemResponse> items) {
-			this.orderId = orderId;
-			this.userId = userId;
+			this.orderId = Integer.parseInt(orderId);
+			this.userId = Integer.parseInt(userId);
 			this.totalPrice = totalPrice;
 			this.status = status;
 			this.items = items;
@@ -211,15 +211,15 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 					String name = parts[1].trim();
 					String description = parts[2].trim();
 					Integer price = Integer.parseInt(parts[3].trim());
-					Integer stockQuantity = Integer.parseInt(parts[4].trim());
+					Integer stock_quantity = Integer.parseInt(parts[4].trim());
 	
 					// Print product to console
 					System.out.printf("Product Loaded: ID=%d, Name=%s, Description=%s, Price=%d, Stock=%d%n",
-							id, name, description, price, stockQuantity);
+							id, name, description, price, stock_quantity);
 
 					EntityRef<Product.Command> productRef = sharding.entityRefFor(Product.ENTITY_KEY, id.toString());
 					ActorRef<Product.Response> adapter = getContext().messageAdapter(Product.Response.class, response -> response);
-					productRef.tell(new Product.CreateProduct(name, description, price, stockQuantity, adapter));
+					productRef.tell(new Product.CreateProduct(name, description, price, stock_quantity, adapter));
 				} catch (NumberFormatException e) {
 					System.err.println("Invalid number format in line: " + line);
 					e.printStackTrace();
@@ -321,7 +321,7 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 					response.name,
 					response.description,
 					response.price,
-					response.stockQuantity
+					response.stock_quantity
 				);
 				replyTo.tell(gatewayResponse);
 			} else {
@@ -333,11 +333,11 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 	}
 
 	private Behavior<Command> onOrderResponse(Order.OrderResponse response) {
-		ActorRef<Response> replyTo = pendingRequests.remove(response.orderId);
+		ActorRef<Response> replyTo = pendingRequests.remove(response.orderId.toString());
 		if (replyTo != null) {
 			Gateway.OrderResponse gatewayResponse = new Gateway.OrderResponse(
-				response.orderId,
-				response.userId,
+				response.orderId.toString(),
+				response.userId.toString(),
 				response.totalPrice,
 				response.status,
 				response.items
