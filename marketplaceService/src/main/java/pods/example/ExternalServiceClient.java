@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 public class ExternalServiceClient {
     private final Http http;
@@ -30,15 +31,23 @@ public class ExternalServiceClient {
         HttpRequest request = HttpRequest.GET(accountServiceBaseUrl + "/users/" + userId);
 
         return http.singleRequest(request)
-            .thenCompose(response -> Unmarshaller.entityToString()
-                .unmarshal(response.entity(), system)
-                .thenApply(body -> {
-                    try {
-                        return objectMapper.readValue(body, UserResponse.class);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to parse user response", e);
-                    }
-                }));
+            .thenCompose(response -> {
+                if (response.status().isSuccess()) {
+                    return Unmarshaller.entityToString()
+                        .unmarshal(response.entity(), system)
+                        .thenApply(body -> {
+                            try {
+                                return objectMapper.readValue(body, UserResponse.class);
+                            } catch (Exception e) {
+                                throw new RuntimeException("Failed to parse user response", e);
+                            }
+                        });
+                } else if (response.status().intValue() == 404) {
+                    return CompletableFuture.completedFuture(null);
+                } else {
+                    throw new RuntimeException("Failed to fetch user with status: " + response.status());
+                }
+            });
     }
 
     public CompletionStage<WalletResponse> getWallet(Integer userId) {

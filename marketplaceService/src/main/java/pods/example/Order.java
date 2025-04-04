@@ -125,6 +125,10 @@ public class Order extends AbstractBehavior<Order.Command> {
     }
 
     private Behavior<Command> onGetOrder(GetOrder command) {
+        if (orderId == null) {
+            command.replyTo.tell(new OrderResponse(null, null, null, null, null));
+            return this;
+        }
         command.replyTo.tell(new OrderResponse(orderId, userId, totalPrice, status, items));
         return this;
     }

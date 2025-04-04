@@ -102,6 +102,9 @@ public class Main {
                     } catch (Exception e) {
                         sendResponse(exchange, 500, "Error serializing response");
                     }
+                } else if (r instanceof Gateway.OperationResponse) {
+                    Gateway.OperationResponse operationResponse = (Gateway.OperationResponse) r;
+                    sendResponse(exchange, operationResponse.success ? 200 : 404, operationResponse.message);
                 } else {
                     sendResponse(exchange, 404, "Order not found");
                 }
@@ -137,7 +140,9 @@ public class Main {
                     }
                 } else if (r instanceof Gateway.OperationResponse) {
                     Gateway.OperationResponse operationResponse = (Gateway.OperationResponse) r;
-                    sendResponse(exchange, operationResponse.success ? 200 : 400, operationResponse.message);
+                    int statusCode = operationResponse.success ? 200 : 
+                        operationResponse.message.equals("User not found") ? 404 : 400;
+                    sendResponse(exchange, statusCode, operationResponse.message);
                 }
             });
         }

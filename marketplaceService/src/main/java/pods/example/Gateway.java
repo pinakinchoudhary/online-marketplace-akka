@@ -109,14 +109,14 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 	}
 
 	public static class ProductResponse implements Response {
-		public final String id;
+		public final Integer id;
 		public final String name;
 		public final String description;
 		public final Integer price;
 		public final Integer stock_quantity;
 
 		public ProductResponse(String id, String name, String description, Integer price, Integer stock_quantity) {
-			this.id = id;
+			this.id = (id != null && !id.isEmpty()) ? Integer.parseInt(id) : null;
 			this.name = name;
 			this.description = description;
 			this.price = price;
@@ -135,11 +135,19 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 		public final List<OrderItem.OrderItemResponse> items;
 
 		public OrderResponse(String orderId, String userId, Integer totalPrice, String status, List<OrderItem.OrderItemResponse> items) {
-			this.orderId = Integer.parseInt(orderId);
-			this.userId = Integer.parseInt(userId);
-			this.totalPrice = totalPrice;
-			this.status = status;
-			this.items = items;
+			if (orderId == null || orderId.isEmpty()) {
+				this.orderId = null;
+				this.userId = null;
+				this.totalPrice = null;
+				this.status = null;
+				this.items = null;
+			} else {
+				this.orderId = Integer.parseInt(orderId);
+				this.userId = (userId != null && !userId.isEmpty()) ? Integer.parseInt(userId) : null;
+				this.totalPrice = totalPrice;
+				this.status = status;
+				this.items = items;
+			}
 		}
 	}
 
@@ -312,12 +320,12 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 	}
 
 	private Behavior<Command> onProductResponse(Product.ProductResponse response) {
-		ActorRef<Response> replyTo = pendingRequests.remove(response.id);
+		ActorRef<Response> replyTo = pendingRequests.remove(response.id.toString());
 		if (replyTo != null) {
 			// Only send response if the product has actual data (not just default values)
 			if (response.name != null && !response.name.isEmpty()) {
 				Gateway.ProductResponse gatewayResponse = new Gateway.ProductResponse(
-					response.id,
+					response.id.toString(),
 					response.name,
 					response.description,
 					response.price,
@@ -333,11 +341,15 @@ public class Gateway extends AbstractBehavior<Gateway.Command> {
 	}
 
 	private Behavior<Command> onOrderResponse(Order.OrderResponse response) {
-		ActorRef<Response> replyTo = pendingRequests.remove(response.orderId.toString());
+		ActorRef<Response> replyTo = pendingRequests.remove(response.orderId);
 		if (replyTo != null) {
+			if (response.orderId == null || response.userId == null || response.status == null || response.items == null) {
+				replyTo.tell(new OperationResponse(false, "Order not found"));
+				return this;
+			}
 			Gateway.OrderResponse gatewayResponse = new Gateway.OrderResponse(
-				response.orderId.toString(),
-				response.userId.toString(),
+				response.orderId,
+				response.userId,
 				response.totalPrice,
 				response.status,
 				response.items
