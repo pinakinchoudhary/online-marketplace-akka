@@ -1,0 +1,5 @@
+com/onlinemarketplace/walletService/model/WalletRequestBody.class
+com/onlinemarketplace/walletService/model/Wallet.class
+com/onlinemarketplace/walletService/repository/WalletRepository.class
+com/onlinemarketplace/walletService/controller/WalletServiceController.class
+com/onlinemarketplace/walletService/WalletServiceApplication.class
